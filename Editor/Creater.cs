@@ -1,4 +1,3 @@
-//using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,24 +12,24 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
     public class Creater
     {
         private static GameObject _targetObj;
-        private static string TargetName => _targetObj.name; 
+        private static string TargetName => _targetObj.name;
         private static VRCAvatarDescriptor Descriptor => FindComponentInParent<VRCAvatarDescriptor>(_targetObj);
         private static GameObject ArmatureConfig => Descriptor.transform.GetComponentsInChildren<Transform>(true)?.FirstOrDefault(t => t.name == ARMATURECONFIGNAME)?.gameObject;
         private const string ARMATURECONFIGNAME = "ArmatureConfig";
 
-        [MenuItem("GameObject/ArmatureConfig_Create")]
+        [MenuItem("GameObject/ArmatureConfig/Create", false, 20)]
         private static void CreateArmatureConfig(MenuCommand menuCommand)
         {
             _targetObj = Selection.activeGameObject;
             main();
         }
-        [MenuItem("GameObject/ArmatureConfig_Remove")]
+        [MenuItem("GameObject/ArmatureConfig/Remove", false, 20)]
         private static void RemoveArmatureConfigComponents(MenuCommand menuCommand)
         {
             _targetObj = Selection.activeGameObject;
             RemoveComponents();
         }
-        [MenuItem("GameObject/ArmatureConfig_Remap")]
+        [MenuItem("GameObject/ArmatureConfig/Remap", false, 20)]
         private static void RemapArmatureConfigComponents(MenuCommand menuCommand)
         {
             _targetObj = Selection.activeGameObject;
@@ -67,7 +66,7 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
                 var components = child.GetComponents<Component>();
                 foreach (var c in components)
                 {
-                    if (!(c is Transform || c is VRCPhysBone || c is VRCPhysBoneCollider ))
+                    if (!(c is Transform || c is VRCPhysBone || c is VRCPhysBoneCollider))
                     {
                         Object.DestroyImmediate(c);
                     }
@@ -75,12 +74,12 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
             }
             var orgPath = new GameObject("OriginalPath");
             orgPath.transform.SetParent(copiedObj.transform);
-            var pathObj = new GameObject(GetRelativePath(Descriptor.transform,_targetObj).Replace("/","@@"));
+            var pathObj = new GameObject(GetRelativePath(Descriptor.transform, _targetObj).Replace("/", "@@"));
             pathObj.transform.SetParent(orgPath.transform);
             RemoveComponents(true);
             ReferenceRemap();
         }
-        private static void RemoveComponents(bool beforeCheck=false)
+        private static void RemoveComponents(bool beforeCheck = false)
         {
             if (beforeCheck)
             {
@@ -95,14 +94,14 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
                     }
                 }
                 //オリジナルArmatureからVRCPhysBone,VRCphysBoneColliderを削除しますか？とメッセージで確認する
-                if (!EditorUtility.DisplayDialog("処理を続行しますか？", "オリジナルArmatureからVRCPhysBone, VRCphysBoneColliderを削除しますか？\n\rメニュー：ArmatureConfig_Removeによって後から実行することもできます。", "Yes", "No"))
+                if (!EditorUtility.DisplayDialog("処理を続行しますか？", "オリジナルArmatureからVRCPhysBone, VRCphysBoneColliderを削除しますか？\n\rメニュー：Removeによって後から実行することもできます。", "Yes", "No"))
                 {
                     return;
                 }
             }
             else
             {
-                if(ArmatureConfig == null)
+                if (ArmatureConfig == null)
                 {
                     EditorUtility.DisplayDialog("処理をキャンセルしました", "ArmatureConfigが見つからないため処理をキャンセルしました。\n\rこの機能はCreate時にオリジナルPB等を削除しなかった場合に後から実行するためのものです。", "OK");
                     return;
@@ -126,7 +125,7 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
             }
         }
 
-        private static void ReferenceRemap(bool NoMsg=false)
+        private static void ReferenceRemap(bool NoMsg = false)
         {
             if (ArmatureConfig == null)
             {
@@ -137,9 +136,9 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
                 return;
             }
             //ArmatureConfigの子のOriginalPathGameObjectの子のgameObjectの名前を取得
-            string OriginalPath = ArmatureConfig?.transform?.Find("OriginalPath")?.GetChild(0)?.name?.Replace("@@","/");
+            string OriginalPath = ArmatureConfig?.transform?.Find("OriginalPath")?.GetChild(0)?.name?.Replace("@@", "/");
             Transform OriginalRootTransform = Descriptor?.transform?.Find(OriginalPath);
-            if(!NoMsg && OriginalRootTransform == null)
+            if (!NoMsg && OriginalRootTransform == null)
             {
                 EditorUtility.DisplayDialog("処理をキャンセルしました", "OriginalTransformが見つからないため処理をキャンセルしました。\n\r名前の変更などがあったかもしれません。再度Createすることを検討してください。", "OK");
                 return;
@@ -150,11 +149,11 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
                 var components = child.GetComponents<Component>();
                 foreach (var c in components)
                 {
-                    if (c is VRCPhysBone )
+                    if (c is VRCPhysBone)
                     {
                         ((VRCPhysBone)c).rootTransform = getOriginalTransform(OriginalRootTransform, ArmatureConfig, c.gameObject);
                     }
-                    if(c is VRCPhysBoneCollider)
+                    if (c is VRCPhysBoneCollider)
                     {
                         ((VRCPhysBoneCollider)c).rootTransform = getOriginalTransform(OriginalRootTransform, ArmatureConfig, c.gameObject);
                     }
@@ -165,7 +164,7 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
         private static Transform getOriginalTransform(Transform originalRootTransform, GameObject armatureConfig, GameObject mirrorObject)
         {
             var relativePath = GetRelativePath(armatureConfig.transform, mirrorObject.transform);
-            return  originalRootTransform.Find(relativePath);
+            return originalRootTransform.Find(relativePath);
         }
     }
 }
