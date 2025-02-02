@@ -1,6 +1,6 @@
 {
   "name": "com.github.pandrabox.armatureconfigcreater",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "displayName": "ArmatureConfigCreater",
   "author": {
     "name": "pandra"
@@ -9,7 +9,7 @@
   "description": "A tool for ArmatureConfig",
   "vpmDependencies": {
     "com.github.pandrabox.pandravase": ">=1.1.0",
-    "com.vrchat.avatars": ">=3.4.0"
+    "com.vrchat.avatars": ">=3.4.0 <2.0.0"
   },
   "license": "MIT"
 }
