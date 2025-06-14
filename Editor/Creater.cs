@@ -5,7 +5,6 @@ using UnityEditor;
 using UnityEngine;
 using VRC.SDK3.Avatars.Components;
 using VRC.SDK3.Dynamics.PhysBone.Components;
-using static com.github.pandrabox.pandravase.runtime.Util;
 
 namespace com.github.pandrabox.armatureconfigcreater.editor
 {
@@ -13,6 +12,7 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
     {
         private static GameObject _targetObj;
         private static string TargetName => _targetObj.name;
+        // Unity標準APIで親からコンポーネントを探す
         private static VRCAvatarDescriptor Descriptor => FindComponentInParent<VRCAvatarDescriptor>(_targetObj);
         private static GameObject ArmatureConfig => Descriptor.transform.GetComponentsInChildren<Transform>(true)?.FirstOrDefault(t => t.name == ARMATURECONFIGNAME)?.gameObject;
         private const string ARMATURECONFIGNAME = "ArmatureConfig";
@@ -74,7 +74,7 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
             }
             var orgPath = new GameObject("OriginalPath");
             orgPath.transform.SetParent(copiedObj.transform);
-            var pathObj = new GameObject(GetRelativePath(Descriptor.transform, _targetObj).Replace("/", "@@"));
+            var pathObj = new GameObject(GetRelativePath(Descriptor.transform, _targetObj.transform).Replace("/", "@@"));
             pathObj.transform.SetParent(orgPath.transform);
             RemoveComponents(true);
             ReferenceRemap();
@@ -165,6 +165,35 @@ namespace com.github.pandrabox.armatureconfigcreater.editor
         {
             var relativePath = GetRelativePath(armatureConfig.transform, mirrorObject.transform);
             return originalRootTransform.Find(relativePath);
+        }
+
+        // Unity標準APIで親からコンポーネントを探す
+        private static T FindComponentInParent<T>(GameObject obj) where T : Component
+        {
+            if (obj == null) return null;
+            Transform current = obj.transform.parent;
+            while (current != null)
+            {
+                T comp = current.GetComponent<T>();
+                if (comp != null) return comp;
+                current = current.parent;
+            }
+            return null;
+        }
+
+        // Unity標準APIでTransform間の相対パスを取得
+        private static string GetRelativePath(Transform parent, Transform child)
+        {
+            if (parent == null || child == null) return null;
+            if (!child.IsChildOf(parent)) return null;
+            string path = "";
+            Transform current = child;
+            while (current != parent)
+            {
+                path = current.name + (path == "" ? "" : "/") + path;
+                current = current.parent;
+            }
+            return path;
         }
     }
 }
